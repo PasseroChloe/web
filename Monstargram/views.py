@@ -1,6 +1,7 @@
-from rest_framework.parsers import JSONParser
+from django.http import Http404
+
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
@@ -9,19 +10,18 @@ from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer
 
 
 # Create your views here.
-@api_view(['GET', 'POST'])
-def user_list(request, format=None):
+class UserList(APIView):
     """
     list all the users, or create a user
     :param request:
     :return:
     """
-    if request.method == 'GET':
+    def get(self, request, format=None):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -29,48 +29,52 @@ def user_list(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def user_detail(request, pk, format=None):
+
+class UserDetail(APIView):
     """
     read, update or delete a user instance
     :param request:
     :param pk:
     :return:
     """
-    try:
-        user = User.objects.get(pk=pk)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
 
-    if request.method == 'GET':
+    def get(self, request, pk, format=None):
+        user = self.get_object(pk)
         serializer = UserQuerySerializer(user)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    def put(self, request, pk, format=None):
+        user = self.get_object(pk)
         serializer = UserQuerySerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, format=None):
+        user = self.get_object(pk)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'POST'])
-def resource_list(request):
+
+class ResourceList(APIView):
     """
     list all the resources, or create a resource
     :param request:
     :return:
     """
-    if request.method == 'GET':
+    def get(self, request, format=None):
         resources = Resource.objects.all()
         serializer = ResourceSerializer(resources, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = ResourceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -78,19 +82,18 @@ def resource_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'POST'])
-def user_comment_list(request):
+class UserCommentList(APIView):
     """
     list all the user comments, or create a user comment
     :param request:
     :return:
     """
-    if request.method == 'GET':
+    def get(self, request, format=None):
         user_comments = UserComment.objects.all()
         serializer = UserCommentSerializer(user_comments, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = UserCommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -98,14 +101,14 @@ def user_comment_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'POST'])
-def user_likes_list(request):
-    if request.method == 'GET':
+
+class UserLikesList(APIView):
+    def get(self, request, format=None):
         user_likes = UserLikes.objects.all()
         serializer = UserLikesSerializer(user_likes, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = UserLikesSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
