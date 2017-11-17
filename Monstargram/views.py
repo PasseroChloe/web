@@ -1,8 +1,11 @@
 from django.http import Http404
+from django.contrib.auth.models import User
 
 from rest_framework import status
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 
 
 from .models import User, Resource, UserComment, UserLikes
@@ -13,9 +16,8 @@ from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer
 class UserList(APIView):
     """
     list all the users, or create a user
-    :param request:
-    :return:
     """
+
     def get(self, request, format=None):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
@@ -29,14 +31,11 @@ class UserList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class UserDetail(APIView):
     """
     read, update or delete a user instance
-    :param request:
-    :param pk:
-    :return:
     """
+
     def get_object(self, pk):
         try:
             return User.objects.get(pk=pk)
@@ -62,13 +61,11 @@ class UserDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
 class ResourceList(APIView):
     """
     list all the resources, or create a resource
-    :param request:
-    :return:
     """
+
     def get(self, request, format=None):
         resources = Resource.objects.all()
         serializer = ResourceSerializer(resources, many=True)
@@ -81,13 +78,15 @@ class ResourceList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class UserCommentList(APIView):
     """
     list all the user comments, or create a user comment
-    :param request:
-    :return:
     """
+
     def get(self, request, format=None):
         user_comments = UserComment.objects.all()
         serializer = UserCommentSerializer(user_comments, many=True)
@@ -101,8 +100,10 @@ class UserCommentList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class UserLikesList(APIView):
+    """
+    list all the user likes, or create a user comment
+    """
     def get(self, request, format=None):
         user_likes = UserLikes.objects.all()
         serializer = UserLikesSerializer(user_likes, many=True)
