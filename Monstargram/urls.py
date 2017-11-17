@@ -4,9 +4,10 @@ from . import views
 
 
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
-    url(r'^user_list', views.get_user_list),
-    url(r'^resource_list', views.get_resource_list),
-    url(r'^user_comment_list', views.get_user_comment_list),
-    url(r'^user_likes_list', views.get_user_likes_list),
+    url(r'^users/$', views.user_list),
+    url(r'^user/(?P<pk>[0-9]+)/$', views.user_detail),
+    url(r'^resources/$', views.resource_list),
+    url(r'^user_comments/$',views.user_comment_list),
+    url(r'^user_likes/$', views.user_likes_list),
 ]
+

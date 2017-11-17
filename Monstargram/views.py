@@ -1,41 +1,107 @@
-from django.http import HttpResponse, JsonResponse
-from django.core import serializers
-from .models import User
-from .models import Resource
-from .models import UserComment
-from .models import UserLikes
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
-import json
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+
+from .models import User, Resource, UserComment, UserLikes
+from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
+
 
 # Create your views here.
 
 
-def index(request):
-    resp = {'errorcode': 100, 'detail': 'Welcome to the index of Monstargram!'}
-    return HttpResponse(json.dumps(resp), content_type="application/json")
+class JSONResponse(HttpResponse):
+    def __init__(self, data, **kwargs):
+        content = JSONRenderer().render(data)
+        kwargs['content_type'] = 'application/json'
+        super(JSONResponse, self).__init__(content, **kwargs)
 
 
-def get_user_list(request):
-    user_list = User.objects.all()
-    user_list_serial = serializers.serialize("json", user_list)
-    return JsonResponse(user_list_serial, safe=False)
+@csrf_exempt
+def user_list(request):
+    if request.method == 'GET':
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data, status=201)
+        return JSONResponse(serializer.errors, status=400)
 
 
-def get_resource_list(request):
-    resource_list = [i for i in Resource.objects.all()]
-    resource_list_serial = serializers.serialize("json", resource_list)
-    return JsonResponse(resource_list_serial, safe=False)
+@csrf_exempt
+def user_detail(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = UserQuerySerializer(user)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        serializer = UserQuerySerializer(user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data)
+        return JSONResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        user.delete()
+        return HttpResponse(status=204)
 
 
-def get_user_comment_list(request):
-    user_comment_list = UserComment.objects.all()
-    user_comment_list_serial = serializers.serialize("json", user_comment_list)
-    return JsonResponse(user_comment_list_serial, safe=False)
+@csrf_exempt
+def resource_list(request):
+    if request.method == 'GET':
+        resources = Resource.objects.all()
+        serializer = ResourceSerializer(resources, many=True)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = ResourceSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data, status=201)
+        return JSONResponse(serializer.errors, status=400)
 
 
-def get_user_likes_list(request):
-    user_likes_list = UserLikes.objects.all()
-    user_likes_list_serial = serializers.serialize(
-        "json", user_likes_list)
-    return JsonResponse(user_likes_list_serial, safe=False)
+@csrf_exempt
+def user_comment_list(request):
+    if request.method == 'GET':
+        user_comments = UserComment.objects.all()
+        serializer = UserCommentSerializer(user_comments, many=True)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = UserCommentSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data, status=201)
+        return JSONResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def user_likes_list(request):
+    if request.method == 'GET':
+        user_likes = UserLikes.objects.all()
+        serializer = UserLikesSerializer(user_likes, many=True)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = UserLikesSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data, status=201)
+        return JSONResponse(serializer.errors, status=400)
