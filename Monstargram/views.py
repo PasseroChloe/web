@@ -1,107 +1,113 @@
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-
-
-from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 from .models import User, Resource, UserComment, UserLikes
 from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
 
 
 # Create your views here.
-
-
-class JSONResponse(HttpResponse):
-    def __init__(self, data, **kwargs):
-        content = JSONRenderer().render(data)
-        kwargs['content_type'] = 'application/json'
-        super(JSONResponse, self).__init__(content, **kwargs)
-
-
-@csrf_exempt
-def user_list(request):
+@api_view(['GET', 'POST'])
+def user_list(request, format=None):
+    """
+    list all the users, or create a user
+    :param request:
+    :return:
+    """
     if request.method == 'GET':
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
-        return JSONResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-def user_detail(request, pk):
+@api_view(['GET', 'PUT', 'DELETE'])
+def user_detail(request, pk, format=None):
+    """
+    read, update or delete a user instance
+    :param request:
+    :param pk:
+    :return:
+    """
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
-        return HttpResponse(status=404)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = UserQuerySerializer(user)
-        return JSONResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = UserQuerySerializer(user, data=data)
+        serializer = UserQuerySerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         user.delete()
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def resource_list(request):
+    """
+    list all the resources, or create a resource
+    :param request:
+    :return:
+    """
     if request.method == 'GET':
         resources = Resource.objects.all()
         serializer = ResourceSerializer(resources, many=True)
-        return JSONResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = ResourceSerializer(data=data)
+        serializer = ResourceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def user_comment_list(request):
+    """
+    list all the user comments, or create a user comment
+    :param request:
+    :return:
+    """
     if request.method == 'GET':
         user_comments = UserComment.objects.all()
         serializer = UserCommentSerializer(user_comments, many=True)
-        return JSONResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = UserCommentSerializer(data=data)
+        serializer = UserCommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def user_likes_list(request):
     if request.method == 'GET':
         user_likes = UserLikes.objects.all()
         serializer = UserLikesSerializer(user_likes, many=True)
-        return JSONResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = UserLikesSerializer(data=data)
+        serializer = UserLikesSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
