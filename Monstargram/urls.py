@@ -10,6 +10,9 @@ urlpatterns = [
     url(r'^resources/$', views.ResourceList.as_view()),
     url(r'^user_comments/$',views.UserCommentList.as_view()),
     url(r'^user_likes/$', views.UserLikesList.as_view()),
+    url(r'^login/$', views.Login.as_view()),
+    url(r'^likes/$', views.Likes.as_view()),
+    url(r'^cancel_likes/$', views.CancelLikes.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
