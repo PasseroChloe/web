@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import status
 from rest_framework import permissions
+from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -47,6 +48,22 @@ class UserDetail(APIView):
     def get(self, request, pk, format=None):
         user = self.get_object(pk)
         serializer = UserQuerySerializer(user)
+        # resources = Resource.objects.all()
+        # resources_serializer = ResourceSerializer(resources)
+        # resources_list = []
+        # for i in resources_serializer.data:
+        #     i['resource_id'] = i.pk
+        #     i['resource_title'] = i.resource_title
+        #     i['resource_image'] = i.resource_image
+        #     i['update_time'] = i.upload_time
+        #resources = Resource.objects.all()
+        # resources = serializers.PrimaryKeyRelatedField(
+        #     many=True, queryset=Resource.objects.all())
+        # resource_detail_list = []
+        # num = 0
+        # for item in user:
+        #     item['resource_id'] = item.reverse()
+
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
@@ -72,8 +89,21 @@ class ResourceList(APIView):
 
     def get(self, request, format=None):
         resources = Resource.objects.all().order_by("-upload_time")
+        username_list = []
+        for i in resources:
+            username_list.append(i.author.username)
         serializer = ResourceSerializer(resources, many=True)
-        return Response(serializer.data)
+        resource_detail = []
+        num = 0
+        for x in serializer.data:
+            x['username'] = username_list[num]
+            comment_detail = UserComment.objects.filter(resource_id=x['id'])
+            comment_serializer = UserCommentSerializer(
+                comment_detail, many=True)
+            x['comment'] = comment_serializer.data
+            resource_detail.append(x)
+            num += 1
+        return Response(resource_detail)
 
     def post(self, request, format=None):
         serializer = ResourceSerializer(data=request.data)
@@ -150,7 +180,7 @@ class Login(APIView):
 
 class Likes(APIView):
     def post(self, request, format=None):
-        check_user_likes = UserLikes.objects.create(
+        check_user_likes = UserLikes.objects.get(
             user=request.data['user'],
             resource=request.data['resource'])
         if check_user_likes:
