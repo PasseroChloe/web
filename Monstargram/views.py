@@ -5,14 +5,16 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-
+from rest_framework.reverse import reverse
+from rest_framework.decorators import api_view
 
 from .models import User, Resource, UserComment, UserLikes
 from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
-
+from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
+
+
 class UserList(APIView):
     """
     list all the users, or create a user
@@ -66,6 +68,8 @@ class ResourceList(APIView):
     list all the resources, or create a resource
     """
 
+    parser_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+
     def get(self, request, format=None):
         resources = Resource.objects.all()
         serializer = ResourceSerializer(resources, many=True)
@@ -79,7 +83,7 @@ class ResourceList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(author=self.request.user)
 
 
 class UserCommentList(APIView):
@@ -104,6 +108,7 @@ class UserLikesList(APIView):
     """
     list all the user likes, or create a user comment
     """
+
     def get(self, request, format=None):
         user_likes = UserLikes.objects.all()
         serializer = UserLikesSerializer(user_likes, many=True)

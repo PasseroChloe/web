@@ -25,7 +25,10 @@ class Resource(models.Model):
         verbose_name = '资源'
         verbose_name_plural = '资源'
 
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(
+        User,
+        related_name='resources',
+        on_delete=models.CASCADE)
     resource_title = models.CharField(max_length=160)
     resource_image = models.ImageField(null=True)
     upload_time = models.DateTimeField('date the resource uploaded')
@@ -42,7 +45,10 @@ class UserComment(models.Model):
         verbose_name = '用户评论'
         verbose_name_plural = '用户评论'
     author = models.ForeignKey(User)
-    resource = models.ForeignKey(Resource, related_name='comments')
+    resource = models.ForeignKey(
+        Resource,
+        related_name='comments',
+        on_delete=models.CASCADE)
     content = models.CharField(max_length=600)
     comment_time = models.DateTimeField('date when the user made this comment')
 
@@ -59,7 +65,10 @@ class UserLikes(models.Model):
         verbose_name = '用户点赞'
         verbose_name_plural = '用户点赞'
     user = models.ForeignKey(User)
-    resource = models.ForeignKey(Resource, related_name='likes')
+    resource = models.ForeignKey(
+        Resource,
+        related_name='likes',
+        on_delete=models.CASCADE)
     update_time = models.DateTimeField('date when the user click at this')
 
     def serialize(self):
