@@ -17,7 +17,12 @@ class UserQuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'phone_number', 'resources_id_list')
+        fields = (
+            'id',
+            'email',
+            'username',
+            'phone_number',
+            'resources_id_list')
 
 
 class ResourceSerializer(serializers.ModelSerializer):
@@ -25,7 +30,12 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resource
-        fields = ('id', 'author', 'resource_title', 'resource_image', 'upload_time')
+        fields = (
+            'id',
+            'author',
+            'resource_title',
+            'resource_image',
+            'upload_time')
 
 
 class UserCommentSerializer(serializers.ModelSerializer):
