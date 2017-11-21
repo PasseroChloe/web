@@ -38,6 +38,17 @@ class ResourceSerializer(DynamicFieldsModelSerializer):
         )
 
 
+class UserResourceSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = Resource
+        fields = (
+            'id',
+            'resource_title',
+            'resource_image',
+            'upload_time'
+        )
+
+
 class UserQuerySerializer(DynamicFieldsModelSerializer):
     resources = ResourceSerializer(many=True)
 
@@ -49,17 +60,6 @@ class UserQuerySerializer(DynamicFieldsModelSerializer):
             'username',
             'phone_number',
             'resources')
-
-
-class UserResourceSerializer(DynamicFieldsModelSerializer):
-    class Meta:
-        model = Resource
-        fields = (
-            'id',
-            'resource_title',
-            'resource_image',
-            'upload_time'
-        )
 
 
 class UserCommentSerializer(DynamicFieldsModelSerializer):
