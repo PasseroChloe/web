@@ -8,16 +8,16 @@ from .models import User, Resource, UserComment, UserLikes
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'username', 'phone_number')
+        fields = ('id', 'email', 'username', 'phone_number')
 
 
 class UserQuerySerializer(serializers.ModelSerializer):
-    resources = serializers.PrimaryKeyRelatedField(
+    resources_id_list = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Resource.objects.all())
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'phone_number', 'resources')
+        fields = ('id', 'email', 'username', 'phone_number', 'resources_id_list')
 
 
 class ResourceSerializer(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class UserCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserComment
-        fields = ('author', 'resource', 'content', 'comment_time')
+        fields = ('id', 'author', 'resource', 'content', 'comment_time')
 
 
 class UserLikesSerializer(serializers.ModelSerializer):
@@ -43,4 +43,4 @@ class UserLikesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserLikes
-        fields = ('user', 'resource', 'update_time')
+        fields = ('id', 'user', 'resource', 'update_time')

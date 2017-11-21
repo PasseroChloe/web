@@ -27,7 +27,7 @@ class Resource(models.Model):
 
     author = models.ForeignKey(
         User,
-        related_name='resources',
+        related_name='resources_id_list',
         on_delete=models.CASCADE)
     resource_title = models.CharField(max_length=160)
     resource_image = models.ImageField(null=True)

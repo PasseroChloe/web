@@ -48,23 +48,13 @@ class UserDetail(APIView):
     def get(self, request, pk, format=None):
         user = self.get_object(pk)
         serializer = UserQuerySerializer(user)
-        # resources = Resource.objects.all()
-        # resources_serializer = ResourceSerializer(resources)
-        # resources_list = []
-        # for i in resources_serializer.data:
-        #     i['resource_id'] = i.pk
-        #     i['resource_title'] = i.resource_title
-        #     i['resource_image'] = i.resource_image
-        #     i['update_time'] = i.upload_time
-        #resources = Resource.objects.all()
-        # resources = serializers.PrimaryKeyRelatedField(
-        #     many=True, queryset=Resource.objects.all())
-        # resource_detail_list = []
-        # num = 0
-        # for item in user:
-        #     item['resource_id'] = item.reverse()
-
-        return Response(serializer.data)
+        resources_list = Resource.objects.filter(author_id=pk).all()
+        resource_serializer = ResourceSerializer(resources_list, many=True)
+        user_detail_list = []
+        res = {'user_detail': serializer.data,
+               'resource_detail': resource_serializer.data}
+        user_detail_list.append(res)
+        return Response(user_detail_list)
 
     def put(self, request, pk, format=None):
         user = self.get_object(pk)
@@ -97,6 +87,8 @@ class ResourceList(APIView):
         num = 0
         for x in serializer.data:
             x['username'] = username_list[num]
+            x['likes_num'] = UserLikes.objects.filter(
+                resource_id=x['id']).count()
             comment_detail = UserComment.objects.filter(resource_id=x['id'])
             comment_serializer = UserCommentSerializer(
                 comment_detail, many=True)
