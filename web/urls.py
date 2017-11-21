@@ -16,7 +16,6 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib.auth.models import User
 from django.contrib import admin
-# from Monstargram import views
 
 from rest_framework import routers, serializers, viewsets
 
