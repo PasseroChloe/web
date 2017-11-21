@@ -10,7 +10,7 @@ from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 
 from .models import User, Resource, UserComment, UserLikes
-from .serializers import UserSerializer, UserQuerySerializer, UserResourceSerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
+from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
 from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.

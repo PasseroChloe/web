@@ -38,19 +38,9 @@ class ResourceSerializer(DynamicFieldsModelSerializer):
         )
 
 
-class UserResourceSerializer(DynamicFieldsModelSerializer):
-    class Meta:
-        model = Resource
-        fields = (
-            'id',
-            'resource_title',
-            'resource_image',
-            'upload_time'
-        )
-
 
 class UserQuerySerializer(DynamicFieldsModelSerializer):
-    resources = UserResourceSerializer(many=True)
+    resources = ResourceSerializer(many=True, exclude=('author',))
 
     class Meta:
         model = User
