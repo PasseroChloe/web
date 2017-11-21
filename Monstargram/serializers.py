@@ -50,7 +50,7 @@ class UserResourceSerializer(DynamicFieldsModelSerializer):
 
 
 class UserQuerySerializer(DynamicFieldsModelSerializer):
-    resources = ResourceSerializer(many=True)
+    resources = UserResourceSerializer(many=True)
 
     class Meta:
         model = User
