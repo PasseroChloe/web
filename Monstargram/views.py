@@ -10,7 +10,7 @@ from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 
 from .models import User, Resource, UserComment, UserLikes
-from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
+from .serializers import UserSerializer, UserQuerySerializer, UserResourceSerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
 from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
@@ -49,12 +49,15 @@ class UserDetail(APIView):
         user = self.get_object(pk)
         serializer = UserQuerySerializer(user)
         resources_list = Resource.objects.filter(author_id=pk).all()
-        resource_serializer = ResourceSerializer(resources_list, many=True)
-        user_detail_list = []
-        res = {'user_detail': serializer.data,
-               'resource_detail': resource_serializer.data}
-        user_detail_list.append(res)
-        return Response(user_detail_list)
+        resource_serializer = UserResourceSerializer(resources_list, many=True)
+        res = serializer.data
+        res['resources'] = resource_serializer.data
+        return Response(res)
+        # user_detail_list = []
+        # res = {'user_detail': serializer.data,
+        #        'resource_detail': resource_serializer.data}
+        # user_detail_list.append(res)
+        # return Response(user_detail_list)
 
     def put(self, request, pk, format=None):
         user = self.get_object(pk)

@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserQuerySerializer(serializers.ModelSerializer):
-    resources_id_list = serializers.PrimaryKeyRelatedField(
+    resources = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Resource.objects.all())
 
     class Meta:
@@ -22,7 +22,7 @@ class UserQuerySerializer(serializers.ModelSerializer):
             'email',
             'username',
             'phone_number',
-            'resources_id_list')
+            'resources')
 
 
 class ResourceSerializer(serializers.ModelSerializer):
@@ -33,6 +33,16 @@ class ResourceSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'author',
+            'resource_title',
+            'resource_image',
+            'upload_time')
+
+
+class UserResourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Resource
+        fields = (
+            'id',
             'resource_title',
             'resource_image',
             'upload_time')

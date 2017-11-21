@@ -32,8 +32,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-
-
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 
