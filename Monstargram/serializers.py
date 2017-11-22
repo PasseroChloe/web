@@ -18,18 +18,6 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
                     self.fields.pop(field_name)
 
 
-class UserSerializer(DynamicFieldsModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'email', 'username', 'phone_number')
-
-
-class UserCreateSerializer(DynamicFieldsModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'email', 'username', 'password', 'phone_number')
-
-
 class ResourceSerializer(DynamicFieldsModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
 
@@ -44,7 +32,7 @@ class ResourceSerializer(DynamicFieldsModelSerializer):
         )
 
 
-class UserQuerySerializer(DynamicFieldsModelSerializer):
+class UserSerializer(DynamicFieldsModelSerializer):
     resources = ResourceSerializer(many=True, exclude=('author',))
 
     class Meta:
@@ -53,8 +41,22 @@ class UserQuerySerializer(DynamicFieldsModelSerializer):
             'id',
             'email',
             'username',
+            'password',
             'phone_number',
             'resources')
+
+
+# class UserQuerySerializer(DynamicFieldsModelSerializer):
+#     resources = ResourceSerializer(many=True, exclude=('author',))
+#
+#     class Meta:
+#         model = User
+#         fields = (
+#             'id',
+#             'email',
+#             'username',
+#             'phone_number',
+#             'resources')
 
 
 class UserCommentSerializer(DynamicFieldsModelSerializer):

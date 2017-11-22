@@ -1,17 +1,16 @@
-from django.http import Http404, JsonResponse
 from django.contrib.auth.models import User
-
-from rest_framework import status
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions
-from rest_framework import serializers
-from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 
 from .models import User, Resource, UserComment, UserLikes
-from .serializers import UserSerializer, UserCreateSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
 from .permissions import IsOwnerOrReadOnly
+from .serializers import UserSerializer, ResourceSerializer, \
+    UserCommentSerializer, UserLikesSerializer
+
 
 # Create your views here.
 
@@ -23,11 +22,11 @@ class UserList(APIView):
 
     def get(self, request, format=None):
         users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
+        serializer = UserSerializer(users, many=True, exclude=['password', 'resources',])
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = UserCreateSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -47,16 +46,16 @@ class UserDetail(APIView):
 
     def get(self, request, pk, format=None):
         user = self.get_object(pk)
-        serializer = UserQuerySerializer(user)
+        serializer = UserSerializer(user, exclude=['password',])
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = UserQuerySerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def put(self, request, pk, format=None):
+    #     user = self.get_object(pk)
+    #     serializer = UserQuerySerializer(user, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         user = self.get_object(pk)
@@ -140,28 +139,26 @@ class UserLikesList(APIView):
 
 class Login(APIView):
     def post(self, request, format=None):
-        try:
-            check_username = User.objects.get(
-                username=request.data['username'])
-        except Exception as e:
-            user_not_exist_res = {
-                'status': 0, 'message': "No such user exists!"}
-            return JsonResponse(user_not_exist_res, safe=False)
-
-        user_password = request.data['password']
-        if(check_username.password == user_password):
-            password_match_res = {
-                'status': 1,
-                'message': 'Login successfully!',
-                'data': {
-                    'user_id': check_username.pk,
-                    'username': check_username.username,
-                    'user_phone_number': check_username.phone_number,
-                    'user_email': check_username.email}}
-            return JsonResponse(password_match_res, safe=False)
-        else:
-            password_wrong_res = {'status': 0, 'message': 'Password is wrong!'}
-            return JsonResponse(password_wrong_res, safe=False)
+        serializer = UserCreateSerializer(data=request.data, exclude=['id', 'email', 'phone_number'])
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = get_object_or_404(User, username=serializer.validated_data['username'])
+        return Response('ok')
+        #
+        # user_password = request.data['password']
+        # if(check_username.password == user_password):
+        #     password_match_res = {
+        #         'status': 1,
+        #         'message': 'Login successfully!',
+        #         'data': {
+        #             'user_id': check_username.pk,
+        #             'username': check_username.username,
+        #             'user_phone_number': check_username.phone_number,
+        #             'user_email': check_username.email}}
+        #     return JsonResponse(password_match_res, safe=False)
+        # else:
+        #     password_wrong_res = {'status': 0, 'message': 'Password is wrong!'}
+        #     return JsonResponse(password_wrong_res, safe=False)
 
 
 class Likes(APIView):
