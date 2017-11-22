@@ -10,7 +10,7 @@ from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 
 from .models import User, Resource, UserComment, UserLikes
-from .serializers import UserSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
+from .serializers import UserSerializer, UserCreateSerializer, UserQuerySerializer, ResourceSerializer, UserCommentSerializer, UserLikesSerializer
 from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
@@ -27,7 +27,7 @@ class UserList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

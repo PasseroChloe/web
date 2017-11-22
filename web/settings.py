@@ -92,6 +92,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -122,11 +125,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-# SOUTH_DATABASE_ADAPTERS = {
-#     'default': 'south.db.sqlite3'
-# }
-
-
 # REST_FRAMEWORK = {
 #     # Use Django's standard `django.contrib.auth` permissions,
 #     # or allow read-only access for unauthenticated users.
@@ -134,3 +132,6 @@ STATIC_URL = '/static/'
 #         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
 #     ]
 # }
+
+
+AUTHENTIFICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend', ]

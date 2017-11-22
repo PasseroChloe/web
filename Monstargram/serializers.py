@@ -24,6 +24,12 @@ class UserSerializer(DynamicFieldsModelSerializer):
         fields = ('id', 'email', 'username', 'phone_number')
 
 
+class UserCreateSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'password', 'phone_number')
+
+
 class ResourceSerializer(DynamicFieldsModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
 
@@ -36,7 +42,6 @@ class ResourceSerializer(DynamicFieldsModelSerializer):
             'resource_image',
             'upload_time'
         )
-
 
 
 class UserQuerySerializer(DynamicFieldsModelSerializer):
