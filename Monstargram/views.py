@@ -143,33 +143,45 @@ class UserLikesList(APIView):
 
 class Login(APIView):
     def post(self, request, format=None):
-        serializer = UserSerializer(
-            data=request.data, exclude=[
-                'id', 'email', 'phone_number', 'resources',
-            ]
-        )
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
-        user = get_object_or_404(
-            User, username=serializer.validated_data['username'])
-        return Response('ok')
-        #
-        # user_password = request.data['password']
-        # if(check_username.password == user_password):
-        #     password_match_res = {
-        #         'status': 1,
-        #         'message': 'Login successfully!',
-        #         'data': {
-        #             'user_id': check_username.pk,
-        #             'username': check_username.username,
-        #             'user_phone_number': check_username.phone_number,
-        #             'user_email': check_username.email}}
-        #     return JsonResponse(password_match_res, safe=False)
-        # else:
-        #     password_wrong_res = {'status': 0, 'message': 'Password is wrong!'}
-        #     return JsonResponse(password_wrong_res, safe=False)
+        try:
+            check_username = User.objects.get(
+                username=request.data['username'])
+        except Exception as e:
+            user_not_exist_error = {
+                'status': 0,
+                'message': 'User with this username doesn\'t exist!'
+            }
+            return Response(user_not_exist_error)
+
+        user_password = request.data['password']
+        if (check_username.password == user_password):
+            password_match_res = {
+                'status': 1,
+                'message': 'Login successfully!',
+                'data': {
+                    'user_id': check_username.pk,
+                    'username': check_username.username,
+                    'user_phone_number': check_username.phone_number,
+                    'user_email': check_username.email}}
+            return Response(password_match_res)
+        else:
+            password_wrong_res = {'status': 0, 'message': 'Password is wrong!'}
+            return Response(password_wrong_res)
+
+    # serializer = UserSerializer(
+        #     data=request.data, exclude=[
+        #         'id', 'email', 'phone_number', 'resources',
+        #     ]
+        # )
+        # if not serializer.is_valid():
+        #     return Response(
+        #         serializer.errors,
+        #         status=status.HTTP_400_BAD_REQUEST)
+        # user = get_object_or_404(
+        #     User, username=serializer.validated_data['username'], password = serializer.validated_data['password']
+        # )
+        # print(user)
+        # return Response('ok')
 
 
 class Likes(APIView):
@@ -177,7 +189,7 @@ class Likes(APIView):
         check_user_likes = UserLikes.objects.create(
             user_id=request.data['user_id'],
             resource_id=request.data['resource_id'],
-            update_time = request.data['update_time']
+            update_time=request.data['update_time']
         )
         if check_user_likes:
             user_likes_succeed = {
