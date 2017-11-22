@@ -43,20 +43,8 @@ class UserSerializer(DynamicFieldsModelSerializer):
             'username',
             'password',
             'phone_number',
-            'resources')
-
-
-# class UserQuerySerializer(DynamicFieldsModelSerializer):
-#     resources = ResourceSerializer(many=True, exclude=('author',))
-#
-#     class Meta:
-#         model = User
-#         fields = (
-#             'id',
-#             'email',
-#             'username',
-#             'phone_number',
-#             'resources')
+            'resources'
+        )
 
 
 class UserCommentSerializer(DynamicFieldsModelSerializer):

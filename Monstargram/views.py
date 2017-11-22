@@ -22,11 +22,15 @@ class UserList(APIView):
 
     def get(self, request, format=None):
         users = User.objects.all()
-        serializer = UserSerializer(users, many=True, exclude=['password', 'resources',])
+        serializer = UserSerializer(
+            users, many=True, exclude=[
+                'password', 'resources',
+            ]
+        )
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data, exclude=['resources', ])
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -46,16 +50,18 @@ class UserDetail(APIView):
 
     def get(self, request, pk, format=None):
         user = self.get_object(pk)
-        serializer = UserSerializer(user, exclude=['password',])
+        serializer = UserSerializer(user, exclude=['password', ])
         return Response(serializer.data)
 
-    # def put(self, request, pk, format=None):
-    #     user = self.get_object(pk)
-    #     serializer = UserQuerySerializer(user, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = UserSerializer(
+            user, data=request.data, exclude=[
+                'resources', ])
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         user = self.get_object(pk)
@@ -77,9 +83,7 @@ class ResourceList(APIView):
             username_list.append(i.author.username)
         serializer = ResourceSerializer(resources, many=True)
         resource_detail = []
-        num = 0
         for x in serializer.data:
-            x['username'] = username_list[num]
             x['likes_num'] = UserLikes.objects.filter(
                 resource_id=x['id']).count()
             comment_detail = UserComment.objects.filter(resource_id=x['id'])
@@ -87,7 +91,6 @@ class ResourceList(APIView):
                 comment_detail, many=True)
             x['comment'] = comment_serializer.data
             resource_detail.append(x)
-            num += 1
         return Response(resource_detail)
 
     def post(self, request, format=None):
@@ -139,10 +142,17 @@ class UserLikesList(APIView):
 
 class Login(APIView):
     def post(self, request, format=None):
-        serializer = UserCreateSerializer(data=request.data, exclude=['id', 'email', 'phone_number'])
+        serializer = UserSerializer(
+            data=request.data, exclude=[
+                'id', 'email', 'phone_number', 'resources',
+            ]
+        )
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user = get_object_or_404(User, username=serializer.validated_data['username'])
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+        user = get_object_or_404(
+            User, username=serializer.validated_data['username'])
         return Response('ok')
         #
         # user_password = request.data['password']
@@ -165,15 +175,18 @@ class Likes(APIView):
     def post(self, request, format=None):
         check_user_likes = UserLikes.objects.get(
             user=request.data['user'],
-            resource=request.data['resource'])
+            resource=request.data['resource']
+        )
         if check_user_likes:
             user_likes_succeed = {
                 'status': 1,
-                'message': 'Likes operation completed successfully!'}
+                'message': 'Likes operation completed successfully!'
+            }
             return JsonResponse(user_likes_succeed, safe=False)
         else:
             user_likes_failed = {'status': 0,
-                                 'message': 'Likes operation has failed!'}
+                                 'message': 'Likes operation has failed!'
+                                 }
             return JsonResponse(user_likes_failed, safe=False)
 
 
@@ -185,9 +198,11 @@ class CancelLikes(APIView):
         if cancel_user_likes:
             cancel_user_likes_succeed = {
                 'status': 1,
-                'message': 'Cancel likes operation completed successfully!'}
+                'message': 'Cancel likes operation completed successfully!'
+            }
             return JsonResponse(cancel_user_likes_succeed, safe=False)
         else:
             cancel_user_likes_failed = {
-                'status': 0, 'message': 'Cancel likes operation has failed!'}
+                'status': 0, 'message': 'Cancel likes operation has failed!'
+            }
             return JsonResponse(cancel_user_likes_failed, safe=False)
