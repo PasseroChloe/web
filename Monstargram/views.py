@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
-from django.http import Http404, JsonResponse
+from django.http import Http404
 from django.shortcuts import get_object_or_404
+
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -173,36 +174,38 @@ class Login(APIView):
 
 class Likes(APIView):
     def post(self, request, format=None):
-        check_user_likes = UserLikes.objects.get(
-            user=request.data['user'],
-            resource=request.data['resource']
+        check_user_likes = UserLikes.objects.create(
+            user_id=request.data['user_id'],
+            resource_id=request.data['resource_id'],
+            update_time = request.data['update_time']
         )
         if check_user_likes:
             user_likes_succeed = {
                 'status': 1,
                 'message': 'Likes operation completed successfully!'
             }
-            return JsonResponse(user_likes_succeed, safe=False)
+            return Response(user_likes_succeed)
         else:
             user_likes_failed = {'status': 0,
                                  'message': 'Likes operation has failed!'
                                  }
-            return JsonResponse(user_likes_failed, safe=False)
+            return Response(user_likes_failed)
 
 
 class CancelLikes(APIView):
     def delete(self, request, format=None):
         cancel_user_likes = UserLikes.objects.filter(
-            user=request.data['user'],
-            resource=request.data['resource'])
+            user_id=request.data['user_id'],
+            resource_id=request.data['resource_id']
+        ).delete()
         if cancel_user_likes:
             cancel_user_likes_succeed = {
                 'status': 1,
                 'message': 'Cancel likes operation completed successfully!'
             }
-            return JsonResponse(cancel_user_likes_succeed, safe=False)
+            return Response(cancel_user_likes_succeed)
         else:
             cancel_user_likes_failed = {
                 'status': 0, 'message': 'Cancel likes operation has failed!'
             }
-            return JsonResponse(cancel_user_likes_failed, safe=False)
+            return Response(cancel_user_likes_failed)
