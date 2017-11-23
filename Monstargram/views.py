@@ -162,7 +162,8 @@ class Login(APIView):
                     'user_id': check_username.pk,
                     'username': check_username.username,
                     'user_phone_number': check_username.phone_number,
-                    'user_email': check_username.email}}
+                    'user_email': check_username.email}
+            }
             return Response(password_match_res)
         else:
             password_wrong_res = {'status': 0, 'message': 'Password is wrong!'}
