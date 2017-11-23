@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password, check_password
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
@@ -153,8 +154,8 @@ class Login(APIView):
             }
             return Response(user_not_exist_error)
 
-        user_password = request.data['password']
-        if (check_username.password == user_password):
+        user_password = make_password(request.data['password'], None, 'pbkdf2_sha256')
+        if check_password(check_username.password, user_password):
             password_match_res = {
                 'status': 1,
                 'message': 'Login successfully!',
